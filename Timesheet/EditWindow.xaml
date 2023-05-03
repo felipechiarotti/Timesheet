@@ -1,0 +1,34 @@
+﻿<Window x:Class="Timesheet.EditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Timesheet"
+        mc:Ignorable="d"
+        Title="Editar" Height="450" Width="1024" Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0" Name="dtGrid" ItemsSource="{Binding Days}" AutoGenerateColumns="True"/>
+
+        <StackPanel Grid.Row="1">
+            
+            <StackPanel  Orientation="Horizontal"  HorizontalAlignment="Center" Margin="0,5,0,5" >
+                <StackPanel Orientation="Horizontal">
+                    <Label>Email:</Label>
+                    <TextBox LostFocus="txEmail_LostFocus" Name="txEmail" Width="150" Height="20"></TextBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <Label>Senha:</Label>
+                    <PasswordBox LostFocus="txPassword_LostFocus" Name="txPassword" Width="150" Height="20"></PasswordBox>
+                </StackPanel>
+            </StackPanel>
+            <Button  Height="35" Background="#FF35A2A2" Foreground="#FFEEEEEE" Content="INICIAR" PreviewMouseDown="Start_MouseDown"></Button>
+        </StackPanel>
+
+    </Grid>
+</Window>
