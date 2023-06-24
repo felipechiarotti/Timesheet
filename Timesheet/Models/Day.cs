@@ -1,4 +1,6 @@
-﻿namespace Timesheet.Models
+﻿using System;
+
+namespace Timesheet.Models
 {
     public class Day
     {
@@ -20,6 +22,13 @@
                 Commit = string.IsNullOrEmpty(Commit) ? "" : Commit,
                 Description = string.IsNullOrEmpty(Description) ? "" : Description
             };
+        }
+
+        public TimeSpan GetTotalHoursWorked()
+        {
+            TimeSpan.TryParse(StartTime, out var startTime);
+            TimeSpan.TryParse(EndTime, out var endTime);
+            return endTime.Subtract(startTime);
         }
     }
 }

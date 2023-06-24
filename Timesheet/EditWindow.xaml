@@ -27,7 +27,7 @@
                     <PasswordBox LostFocus="txPassword_LostFocus" Name="txPassword" Width="150" Height="20"></PasswordBox>
                 </StackPanel>
             </StackPanel>
-            <Button  Height="35" Background="#FF35A2A2" Foreground="#FFEEEEEE" Content="INICIAR" PreviewMouseDown="Start_MouseDown"></Button>
+            <Button  Height="35" Background="#FF35A2A2" Foreground="#FFEEEEEE" Content="Declarar" PreviewMouseDown="Start_MouseDown"></Button>
         </StackPanel>
 
     </Grid>

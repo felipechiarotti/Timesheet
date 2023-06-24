@@ -22,8 +22,8 @@ namespace Timesheet
     /// </summary>
     public partial class EditWindow : Window
     {
-        Process processStartInfo;
-        public List<Day> Days{ get; set; }
+        Process? processStartInfo;
+        public List<Day> Days { get; set; }
 
         public EditWindow(Schedule schedule)
         {
@@ -34,38 +34,72 @@ namespace Timesheet
             txPassword.Password = Properties.Settings.Default.password;
         }
 
-        private void Start_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void Start_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            FileHandler.SaveJsonToFile(Days, Properties.Resources.ScheduleFileName);
-            var login = "";
-            if(!string.IsNullOrEmpty(txEmail.Text) && !string.IsNullOrEmpty(txPassword.Password))
+            var totalHoursWorked = SumTotalHoursWorked();
+            var dialogResult = ShowConfirmationDialog(totalHoursWorked);
+            switch (dialogResult)
             {
+                case MessageBoxResult.Yes:
+                    await RunScript();
+                        break;
+            };
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+            => processStartInfo?.Kill();
+
+        private void txEmail_LostFocus(object sender, RoutedEventArgs e)
+            => SaveProperty(txEmail.Text, PropertySetting.Email);
+
+
+        private void txPassword_LostFocus(object sender, RoutedEventArgs e)
+            => SaveProperty(txPassword.Password, PropertySetting.Password);
+
+        private void SaveProperty(string value, PropertySetting property)
+        {
+            var propertyName = Enum.GetName(typeof(PropertySetting), property);
+            Properties.Settings.Default[propertyName] = value;
+            Properties.Settings.Default.Save();
+        }
+
+        private string GetLoginInfo()
+        {
+            var login = "";
+            if (!string.IsNullOrEmpty(txEmail.Text) && !string.IsNullOrEmpty(txPassword.Password))
                 login = $" {txEmail.Text} {txPassword.Password}";
-            }
-                
+            return login;
+        }
+
+        private Process? StartProcess(string login)
+        {
             ProcessStartInfo start = new ProcessStartInfo();
             start.FileName = Properties.Resources.PythonPath;//cmd is full path to python.exe
             start.Arguments = $"{Properties.Resources.ScriptFileName} {FileHandler.GetProjectId(Properties.Resources.ConfigFileName)}{login}";//args is path to .py file and any cmd line args
             start.UseShellExecute = true;
-            processStartInfo = Process.Start(start);
+            return Process.Start(start);
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private async Task RunScript()
         {
-            if(processStartInfo != null)
-                processStartInfo.Kill();
+            await FileHandler.SaveJsonToFile(Days, Properties.Resources.ScheduleFileName);
+            var login = GetLoginInfo();
+            processStartInfo = StartProcess(login);
         }
 
-        private void txEmail_LostFocus(object sender, RoutedEventArgs e)
+        private double SumTotalHoursWorked()
         {
-            Properties.Settings.Default["email"] = txEmail.Text;
-            Properties.Settings.Default.Save();
+            TimeSpan totalHoursWorked = new TimeSpan();
+            Days.ForEach(d => totalHoursWorked = totalHoursWorked.Add(d.GetTotalHoursWorked()));
+            return totalHoursWorked.TotalHours;
         }
-
-        private void txPassword_LostFocus(object sender, RoutedEventArgs e)
+        private MessageBoxResult ShowConfirmationDialog(double totalHoursWorked)
         {
-            Properties.Settings.Default["password"] = txPassword.Password;
-            Properties.Settings.Default.Save();
+            string messageBoxText = $"Você declarou um total de {totalHoursWorked}  horas, deseja continuar?";
+            string caption = "Confirmação";
+            MessageBoxButton button = MessageBoxButton.YesNo;
+            MessageBoxImage icon = MessageBoxImage.Question;
+            return MessageBox.Show(messageBoxText, caption, button, icon);
         }
     }
 }
